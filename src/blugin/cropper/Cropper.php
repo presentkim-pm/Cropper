@@ -54,14 +54,11 @@ class Cropper extends PluginBase implements Listener{
             return;
 
         $block = $event->getBlock();
-        if(!$block instanceof Crops)
+        if(!$block instanceof Crops || $block->getMeta() < 7)
             return;
 
         $player = $event->getPlayer();
         if(!$player->isSurvival())
-            return;
-
-        if($block->getMeta() < 7)
             return;
 
         $seedItem = $block->getPickedItem();
@@ -89,10 +86,7 @@ class Cropper extends PluginBase implements Listener{
      * @param PlayerInteractEvent $event
      */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
-        if($event->isCancelled())
-            return;
-
-        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK)
+        if($event->isCancelled() || $event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK)
             return;
 
         $player = $event->getPlayer();
@@ -100,10 +94,7 @@ class Cropper extends PluginBase implements Listener{
             return;
 
         $block = $event->getBlock();
-        if(!$block instanceof Crops)
-            return;
-
-        if($block->getMeta() < 7)
+        if(!$block instanceof Crops || $block->getMeta() < 7)
             return;
 
         //Run breakBlock() when after PlayerInteractEvent processing.
