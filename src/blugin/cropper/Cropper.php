@@ -98,8 +98,6 @@ class Cropper extends PluginBase implements Listener{
             return;
 
         //Run breakBlock() when after PlayerInteractEvent processing.
-        $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block) : void{
-            $player->breakBlock($block->getPos());
-        }), 1);
+        $player->breakBlock($block->getPos());
     }
 }
