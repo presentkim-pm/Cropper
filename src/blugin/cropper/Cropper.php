@@ -30,6 +30,7 @@ namespace blugin\cropper;
 use pocketmine\block\Crops;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
@@ -79,6 +80,35 @@ class Cropper extends PluginBase implements Listener{
             if(!$player->getWorld()->useItemOn($block->getPos()->down(), $seedItem, Facing::UP, new Vector3(0.0, 0.0, 0.0), $player)){
                 $player->getWorld()->dropItem($block->getPos(), $seedItem);
             }
+        }), 1);
+    }
+
+    /**
+     * @priority MONITOR
+     *
+     * @param PlayerInteractEvent $event
+     */
+    public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
+        if($event->isCancelled())
+            return;
+
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK)
+            return;
+
+        $player = $event->getPlayer();
+        if(!$player->isSurvival())
+            return;
+
+        $block = $event->getBlock();
+        if(!$block instanceof Crops)
+            return;
+
+        if($block->getMeta() < 7)
+            return;
+
+        //Run breakBlock() when after PlayerInteractEvent processing.
+        $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block) : void{
+            $player->breakBlock($block->getPos());
         }), 1);
     }
 }
