@@ -27,12 +27,58 @@ declare(strict_types=1);
 
 namespace blugin\cropper;
 
+use pocketmine\block\Crops;
+use pocketmine\event\block\BlockBreakEvent;
+use pocketmine\event\Listener;
+use pocketmine\math\Facing;
+use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\ClosureTask;
 
-class Cropper extends PluginBase{
+class Cropper extends PluginBase implements Listener{
     /**
      * Called when the plugin is enabled
      */
     public function onEnable() : void{
+        $this->getServer()->getPluginManager()->registerEvents($this, $this);
+    }
+
+    /**
+     * @priority HIGH
+     *
+     * @param BlockBreakEvent $event
+     */
+    public function onBlockBreakEvent(BlockBreakEvent $event) : void{
+        if($event->isCancelled())
+            return;
+
+        $block = $event->getBlock();
+        if(!$block instanceof Crops)
+            return;
+
+        $player = $event->getPlayer();
+        if(!$player->isSurvival())
+            return;
+
+        if($block->getMeta() < 7)
+            return;
+
+        $seedItem = $block->getPickedItem();
+        $drops = $event->getDrops();
+        for($i = 0, $size = count($drops); $i < $size; ++$i){
+            if($drops[$i]->equals($seedItem)){
+                $drops[$i]->setCount($drops[$i]->getCount() - 1);
+                if($drops[$i]->getCount() <= 0)
+                    unset($drops[$i]);
+            }
+        }
+        $event->setDrops($drops);
+
+        //Run useItemOn() when after BlockBreakEvent processing.
+        $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
+            if(!$player->getWorld()->useItemOn($block->getPos()->down(), $seedItem, Facing::UP, new Vector3(0.0, 0.0, 0.0), $player)){
+                $player->getWorld()->dropItem($block->getPos(), $seedItem);
+            }
+        }), 1);
     }
 }
