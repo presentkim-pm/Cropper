@@ -31,8 +31,10 @@ use pocketmine\block\Block;
 use pocketmine\block\Crops;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
+use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
-use pocketmine\math\Facing;
+use pocketmine\item\Item;
+use pocketmine\item\ItemFactory;
 use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
@@ -64,9 +66,9 @@ class Cropper extends PluginBase implements Listener{
 
         //Run useItemOn() when after BlockBreakEvent processing.
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
-            $world = $player->getWorld();
-            $pos = $block->getPos();
-            if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(), $player)){
+            $world = $player->getLevel();
+            $pos = $block->asPosition();
+            if(!$world->useItemOn($pos->down(), $seedItem, Vector3::SIDE_UP, new Vector3(), $player)){
                 $world->dropItem($pos, $seedItem);
             }
         }), 1);
@@ -81,11 +83,14 @@ class Cropper extends PluginBase implements Listener{
         if(!$player->isSurvival())
             return;
 
-        //Run breakBlock() when after PlayerInteractEvent processing.
-        $player->breakBlock($block->getPos());
+        //Run useBreakOn() when after PlayerInteractEvent processing.
+        $item = ItemFactory::get(Item::AIR, 0, 0);
+        if($player->getLevel()->useBreakOn($block->asPosition(), $item, $player, true)){
+            $player->exhaust(0.025, PlayerExhaustEvent::CAUSE_MINING);
+        }
     }
 
     public static function isRipeCrop(Block $block) : bool{
-        return $block instanceof Crops && $block->getMeta() >= 7;
+        return $block instanceof Crops && $block->getDamage() >= 7;
     }
 }
