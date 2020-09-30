@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace blugin\cropper;
 
+use pocketmine\block\Block;
 use pocketmine\block\Crops;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
@@ -43,8 +44,7 @@ class Cropper extends PluginBase implements Listener{
 
     /** @priority HIGH */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
-        $block = $event->getBlock();
-        if(!$block instanceof Crops || $block->getMeta() < 7)
+        if(!self::isRipeCrop($block = $event->getBlock()))
             return;
 
         $player = $event->getPlayer();
@@ -65,7 +65,7 @@ class Cropper extends PluginBase implements Listener{
         //Run useItemOn() when after BlockBreakEvent processing.
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
             $world = $player->getWorld();
-            $pos =  $block->getPos();
+            $pos = $block->getPos();
             if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(), $player)){
                 $world->dropItem($pos, $seedItem);
             }
@@ -74,18 +74,18 @@ class Cropper extends PluginBase implements Listener{
 
     /** @priority MONITOR */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
-        if($event->isCancelled() || $event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK)
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipeCrop($block = $event->getBlock()))
             return;
 
         $player = $event->getPlayer();
         if(!$player->isSurvival())
             return;
 
-        $block = $event->getBlock();
-        if(!$block instanceof Crops || $block->getMeta() < 7)
-            return;
-
         //Run breakBlock() when after PlayerInteractEvent processing.
         $player->breakBlock($block->getPos());
+    }
+
+    public static function isRipeCrop(Block $block) : bool{
+        return $block instanceof Crops && $block->getMeta() >= 7;
     }
 }
