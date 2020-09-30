@@ -37,22 +37,12 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 
 class Cropper extends PluginBase implements Listener{
-    /**
-     * Called when the plugin is enabled
-     */
     public function onEnable() : void{
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
-    /**
-     * @priority HIGH
-     *
-     * @param BlockBreakEvent $event
-     */
+    /** @priority HIGH */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
-        if($event->isCancelled())
-            return;
-
         $block = $event->getBlock();
         if(!$block instanceof Crops || $block->getMeta() < 7)
             return;
@@ -74,17 +64,15 @@ class Cropper extends PluginBase implements Listener{
 
         //Run useItemOn() when after BlockBreakEvent processing.
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
-            if(!$player->getWorld()->useItemOn($block->getPos()->down(), $seedItem, Facing::UP, new Vector3(0.0, 0.0, 0.0), $player)){
-                $player->getWorld()->dropItem($block->getPos(), $seedItem);
+            $world = $player->getWorld();
+            $pos =  $block->getPos();
+            if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(), $player)){
+                $world->dropItem($pos, $seedItem);
             }
         }), 1);
     }
 
-    /**
-     * @priority MONITOR
-     *
-     * @param PlayerInteractEvent $event
-     */
+    /** @priority MONITOR */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
         if($event->isCancelled() || $event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK)
             return;
