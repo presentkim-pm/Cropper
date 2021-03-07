@@ -66,7 +66,7 @@ class Cropper extends PluginBase implements Listener{
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
             $world = $player->getWorld();
             $pos = $block->getPos();
-            if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(), $player)){
+            if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(0, 0, 0), $player)){
                 $world->dropItem($pos, $seedItem);
             }
         }), 1);
