@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  *
  *  ____  _             _         _____
  * | __ )| |_   _  __ _(_)_ __   |_   _|__  __ _ _ __ ___
@@ -21,6 +21,9 @@
  *   (\ /)
  *  ( . .) ♥
  *  c(")(")
+ *
+ * @noinspection PhpDocSignatureInspection
+ * @noinspection PhpIllegalPsrClassPathInspection
  */
 
 declare(strict_types=1);
