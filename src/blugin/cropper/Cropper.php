@@ -21,6 +21,9 @@
  *   (\ /)
  *  ( . .) ♥
  *  c(")(")
+ *
+ * @noinspection PhpIllegalPsrClassPathInspection
+ * @noinspection PhpDocSignatureInspection
  */
 
 declare(strict_types=1);
@@ -44,7 +47,10 @@ class Cropper extends PluginBase implements Listener{
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
-    /** @priority HIGH */
+    /**
+     * @ignoreCancelled true
+     * @priority HIGHEST
+     */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
         if(!self::isRipeCrop($block = $event->getBlock()))
             return;
@@ -74,7 +80,10 @@ class Cropper extends PluginBase implements Listener{
         }), 1);
     }
 
-    /** @priority MONITOR */
+    /**
+     * @ignoreCancelled true
+     * @priority MONITOR
+     */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
         if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipeCrop($block = $event->getBlock()))
             return;
