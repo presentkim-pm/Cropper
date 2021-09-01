@@ -45,8 +45,8 @@ use function is_dir;
 use function rmdir;
 use function scandir;
 
-class Cropper extends PluginBase implements Listener{
-    public function onEnable() : void{
+final class Cropper extends PluginBase implements Listener{
+    protected function onEnable() : void{
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
         /**
