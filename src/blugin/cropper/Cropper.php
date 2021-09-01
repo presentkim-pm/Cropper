@@ -61,7 +61,7 @@ class Cropper extends PluginBase implements Listener{
 
     /** @priority HIGH */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
-        if(!self::isRipeCrop($block = $event->getBlock()))
+        if(!self::isRipedCrop($block = $event->getBlock()))
             return;
 
         $player = $event->getPlayer();
@@ -91,7 +91,7 @@ class Cropper extends PluginBase implements Listener{
 
     /** @priority MONITOR */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
-        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipeCrop($block = $event->getBlock()))
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipedCrop($block = $event->getBlock()))
             return;
 
         $player = $event->getPlayer();
@@ -102,7 +102,7 @@ class Cropper extends PluginBase implements Listener{
         $player->breakBlock($block->getPos());
     }
 
-    public static function isRipeCrop(Block $block) : bool{
+    private static function isRipedCrop(Block $block) : bool{
         return $block instanceof Crops && $block->getMeta() >= 7;
     }
 }
