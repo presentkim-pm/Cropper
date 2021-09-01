@@ -40,9 +40,23 @@ use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 
+use function count;
+use function is_dir;
+use function rmdir;
+use function scandir;
+
 class Cropper extends PluginBase implements Listener{
     public function onEnable() : void{
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
+
+        /**
+         * This is a plugin that does not use data folders.
+         * Delete the unnecessary data folder of this plugin for users.
+         */
+        $dataFolder = $this->getDataFolder();
+        if(is_dir($dataFolder) && empty(scandir($dataFolder))){
+            rmdir($dataFolder);
+        }
     }
 
     /** @priority HIGH */
