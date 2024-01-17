@@ -102,6 +102,6 @@ class Main extends PluginBase implements Listener{
     }
 
     public static function isRipeCrop(Block $block) : bool{
-        return $block instanceof Crops && $block->getAge() >= 7;
+        return $block instanceof Crops && $block->getAge() >= $block::MAX_AGE;
     }
 }
