@@ -1,9 +1,9 @@
 ---
-name: Cropper
-main: blugin\cropper\Cropper
+name: Main
+main: kim\present\cropper\Main
 version: 1.0.0
 api: [ 5.0.0 ]
-authors: [ Blugin-team, PresentKim ]
+author: PresentKim
 description: Break the crop leaving only roots
 load: STARTUP
 ...
