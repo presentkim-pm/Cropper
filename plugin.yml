@@ -5,5 +5,4 @@ version: 1.0.0
 api: [ 5.0.0 ]
 author: PresentKim
 description: Harvesting crops while preserving their roots with right-click
-load: STARTUP
 ...
