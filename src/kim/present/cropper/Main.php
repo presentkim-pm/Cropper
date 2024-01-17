@@ -82,7 +82,7 @@ class Main extends PluginBase implements Listener{
     }
 
     /**
-     * @ignoreCancelled true
+     * @handleCancelled
      * @priority MONITOR
      */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
