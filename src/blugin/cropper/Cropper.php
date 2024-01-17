@@ -24,6 +24,7 @@
  *
  * @noinspection PhpIllegalPsrClassPathInspection
  * @noinspection PhpDocSignatureInspection
+ * @noinspection PhpUnused
  */
 
 declare(strict_types=1);
@@ -36,8 +37,8 @@ use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
-use pocketmine\item\Item;
-use pocketmine\item\ItemFactory;
+use pocketmine\item\VanillaItems;
+use pocketmine\math\Facing;
 use pocketmine\math\Vector3;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
@@ -48,33 +49,36 @@ class Cropper extends PluginBase implements Listener{
     }
 
     /**
-     * @ignoreCancelled true
      * @priority HIGHEST
      */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
-        if(!self::isRipeCrop($block = $event->getBlock()))
+        if(!self::isRipeCrop($block = $event->getBlock())){
             return;
+        }
 
         $player = $event->getPlayer();
-        if(!$player->isSurvival())
+        if(!$player->isSurvival()){
             return;
+        }
 
         $seedItem = $block->getPickedItem();
         $drops = $event->getDrops();
         for($i = 0, $size = count($drops); $i < $size; ++$i){
             if($drops[$i]->equals($seedItem)){
                 $drops[$i]->setCount($drops[$i]->getCount() - 1);
-                if($drops[$i]->getCount() <= 0)
+                if($drops[$i]->getCount() <= 0){
                     unset($drops[$i]);
+                }
+                break;
             }
         }
         $event->setDrops($drops);
 
         //Run useItemOn() when after BlockBreakEvent processing.
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
-            $world = $player->getLevel();
-            $pos = $block->asPosition();
-            if(!$world->useItemOn($pos->down(), $seedItem, Vector3::SIDE_UP, new Vector3(), $player)){
+            $world = $player->getWorld();
+            $pos = $block->getPosition();
+            if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(0, 0, 0), $player)){
                 $world->dropItem($pos, $seedItem);
             }
         }), 1);
@@ -85,21 +89,23 @@ class Cropper extends PluginBase implements Listener{
      * @priority MONITOR
      */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
-        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipeCrop($block = $event->getBlock()))
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipeCrop($block = $event->getBlock())){
             return;
+        }
 
         $player = $event->getPlayer();
-        if(!$player->isSurvival())
+        if(!$player->isSurvival() || $player->isSneaking()){
             return;
+        }
 
         //Run useBreakOn() when after PlayerInteractEvent processing.
-        $item = ItemFactory::get(Item::AIR, 0, 0);
-        if($player->getLevel()->useBreakOn($block->asPosition(), $item, $player, true)){
-            $player->exhaust(0.025, PlayerExhaustEvent::CAUSE_MINING);
+        $item = VanillaItems::AIR();
+        if($player->getWorld()->useBreakOn($block->getPosition(), $item, $player, true)){
+            $player->getHungerManager()->exhaust(0.025, PlayerExhaustEvent::CAUSE_MINING);
         }
     }
 
     public static function isRipeCrop(Block $block) : bool{
-        return $block instanceof Crops && $block->getDamage() >= 7;
+        return $block instanceof Crops && $block->getAge() >= 7;
     }
 }

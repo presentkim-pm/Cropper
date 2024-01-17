@@ -2,7 +2,7 @@
 name: Cropper
 main: blugin\cropper\Cropper
 version: 1.0.0
-api: [ 3.0.0 ]
+api: [ 5.0.0 ]
 authors: [ Blugin-team, PresentKim ]
 description: Break the crop leaving only roots
 load: STARTUP
