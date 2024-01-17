@@ -48,7 +48,8 @@ class Main extends PluginBase implements Listener{
      * @priority HIGHEST
      */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
-        if(!self::isRipeCrop($block = $event->getBlock())){
+        $block = $event->getBlock();
+        if(!self::isRipeCrop($block)){
             return;
         }
 
@@ -85,7 +86,12 @@ class Main extends PluginBase implements Listener{
      * @priority MONITOR
      */
     public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
-        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK || !self::isRipeCrop($block = $event->getBlock())){
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK){
+            return;
+        }
+
+        $block = $event->getBlock();
+        if(!self::isRipeCrop($block)){
             return;
         }
 
