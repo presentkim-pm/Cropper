@@ -1,5 +1,5 @@
 ---
-name: Main
+name: Cropper
 main: kim\present\cropper\Main
 version: 1.0.0
 api: [ 5.0.0 ]
