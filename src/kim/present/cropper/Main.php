@@ -40,14 +40,18 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 
 class Main extends PluginBase implements Listener{
+    private bool $handleBreak = false;
+
     public function onEnable() : void{
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
-    /**
-     * @priority HIGHEST
-     */
+    /** @priority HIGHEST */
     public function onBlockBreakEvent(BlockBreakEvent $event) : void{
+        if(!$this->handleBreak){
+            return;
+        }
+
         $block = $event->getBlock();
         if(!self::isRipeCrop($block)){
             return;
@@ -79,6 +83,8 @@ class Main extends PluginBase implements Listener{
                 $world->dropItem($pos, $seedItem);
             }
         }), 1);
+
+        $this->handleBreak = false;
     }
 
     /**
@@ -101,9 +107,12 @@ class Main extends PluginBase implements Listener{
         }
 
         //Run useBreakOn() when after PlayerInteractEvent processing.
+        $this->handleBreak = true;
         $item = VanillaItems::AIR();
         if($player->getWorld()->useBreakOn($block->getPosition(), $item, $player, true)){
-            $player->getHungerManager()->exhaust(0.025, PlayerExhaustEvent::CAUSE_MINING);
+            $player->getHungerManager()->exhaust(0.005, PlayerExhaustEvent::CAUSE_MINING);
+        }else{
+            $this->handleBreak = false;
         }
     }
 
