@@ -1,0 +1,10 @@
+---
+branches:
+- main
+projects:
+  Cropper:
+    path: ""
+    icon: "assets/icon.png"
+    lint:
+      phpstan: false
+...
