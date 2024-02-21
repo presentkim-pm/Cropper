@@ -29,6 +29,7 @@ namespace kim\present\cropper;
 
 use pocketmine\block\Block;
 use pocketmine\block\Crops;
+use pocketmine\block\Stem;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerExhaustEvent;
@@ -123,6 +124,6 @@ class Main extends PluginBase implements Listener{
 	}
 
 	public static function isRipeCrop(Block $block) : bool{
-		return $block instanceof Crops && $block->getAge() >= $block::MAX_AGE;
+		return $block instanceof Crops && !($block instanceof Stem) && $block->getAge() >= $block::MAX_AGE;
 	}
 }
