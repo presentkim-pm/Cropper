@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace kim\present\cropper;
 
+use kim\present\removeplugindatafolder\PluginDataFolderEraser;
 use pocketmine\block\Block;
 use pocketmine\block\Crops;
 use pocketmine\block\Stem;
@@ -46,6 +47,7 @@ class Main extends PluginBase implements Listener{
 	private bool $handleBreak = false;
 
 	public function onEnable() : void{
+		PluginDataFolderEraser::erase($this);
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 	}
 
