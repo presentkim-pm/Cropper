@@ -66,16 +66,20 @@ class Main extends PluginBase implements Listener{
 
 		$seedItem = $block->getPickedItem();
 		$drops = $event->getDrops();
+		$found = false;
 		for($i = 0, $size = count($drops); $i < $size; ++$i){
 			if($drops[$i]->equals($seedItem)){
 				$drops[$i]->setCount($drops[$i]->getCount() - 1);
 				if($drops[$i]->getCount() <= 0){
 					unset($drops[$i]);
 				}
+				$found = true;
 				break;
 			}
 		}
-		$event->setDrops($drops);
+		if(!$found && count($player->getInventory()->removeItem($seedItem)) > 0){
+			return;
+		}
 
 		//Run useItemOn() when after BlockBreakEvent processing.
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
