@@ -44,88 +44,89 @@ use pocketmine\scheduler\ClosureTask;
 use function count;
 
 class Main extends PluginBase implements Listener{
-	private bool $handleBreak = false;
 
-	public function onEnable() : void{
-		PluginDataFolderEraser::erase($this);
-		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-	}
+    private bool $handleBreak = false;
 
-	/** @priority HIGHEST */
-	public function onBlockBreakEvent(BlockBreakEvent $event) : void{
-		if(!$this->handleBreak){
-			return;
-		}
+    public function onEnable() : void{
+        PluginDataFolderEraser::erase($this);
+        $this->getServer()->getPluginManager()->registerEvents($this, $this);
+    }
 
-		$block = $event->getBlock();
-		if(!self::isRipeCrop($block)){
-			return;
-		}
+    /** @priority HIGHEST */
+    public function onBlockBreakEvent(BlockBreakEvent $event) : void{
+        if(!$this->handleBreak){
+            return;
+        }
 
-		$player = $event->getPlayer();
-		if(!$player->isSurvival()){
-			return;
-		}
+        $block = $event->getBlock();
+        if(!self::isRipeCrop($block)){
+            return;
+        }
 
-		$seedItem = $block->getPickedItem();
-		$drops = $event->getDrops();
-		$found = false;
-		for($i = 0, $size = count($drops); $i < $size; ++$i){
-			if($drops[$i]->equals($seedItem)){
-				$drops[$i]->setCount($drops[$i]->getCount() - 1);
-				if($drops[$i]->getCount() <= 0){
-					unset($drops[$i]);
-				}
-				$found = true;
-				break;
-			}
-		}
-		if(!$found && count($player->getInventory()->removeItem($seedItem)) > 0){
-			return;
-		}
+        $player = $event->getPlayer();
+        if(!$player->isSurvival()){
+            return;
+        }
 
-		//Run useItemOn() when after BlockBreakEvent processing.
-		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
-			$world = $player->getWorld();
-			$pos = $block->getPosition();
-			if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(0, 0, 0), $player)){
-				$world->dropItem($pos, $seedItem);
-			}
-		}), 1);
+        $seedItem = $block->getPickedItem();
+        $drops = $event->getDrops();
+        $found = false;
+        for($i = 0, $size = count($drops); $i < $size; ++$i){
+            if($drops[$i]->equals($seedItem)){
+                $drops[$i]->setCount($drops[$i]->getCount() - 1);
+                if($drops[$i]->getCount() <= 0){
+                    unset($drops[$i]);
+                }
+                $found = true;
+                break;
+            }
+        }
+        if(!$found && count($player->getInventory()->removeItem($seedItem)) > 0){
+            return;
+        }
 
-		$this->handleBreak = false;
-	}
+        //Run useItemOn() when after BlockBreakEvent processing.
+        $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($player, $block, $seedItem) : void{
+            $world = $player->getWorld();
+            $pos = $block->getPosition();
+            if(!$world->useItemOn($pos->down(), $seedItem, Facing::UP, new Vector3(0, 0, 0), $player)){
+                $world->dropItem($pos, $seedItem);
+            }
+        }), 1);
 
-	/**
-	 * @handleCancelled
-	 * @priority MONITOR
-	 */
-	public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
-		if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK){
-			return;
-		}
+        $this->handleBreak = false;
+    }
 
-		$block = $event->getBlock();
-		if(!self::isRipeCrop($block)){
-			return;
-		}
+    /**
+     * @handleCancelled
+     * @priority MONITOR
+     */
+    public function onPlayerInteractEvent(PlayerInteractEvent $event) : void{
+        if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK){
+            return;
+        }
 
-		$player = $event->getPlayer();
-		if(!$player->isSurvival() || $player->isSneaking()){
-			return;
-		}
+        $block = $event->getBlock();
+        if(!self::isRipeCrop($block)){
+            return;
+        }
 
-		//Run useBreakOn() when after PlayerInteractEvent processing.
-		$this->handleBreak = true;
-		$item = VanillaItems::AIR();
-		if($player->getWorld()->useBreakOn($block->getPosition(), $item, $player, true)){
-			$player->getHungerManager()->exhaust(0.005, PlayerExhaustEvent::CAUSE_MINING);
-		}else{
-			$this->handleBreak = false;
-		}
-	}
+        $player = $event->getPlayer();
+        if(!$player->isSurvival() || $player->isSneaking()){
+            return;
+        }
 
-	public static function isRipeCrop(Block $block) : bool{
-		return $block instanceof Crops && !($block instanceof Stem) && $block->getAge() >= $block::MAX_AGE;
-	}
+        //Run useBreakOn() when after PlayerInteractEvent processing.
+        $this->handleBreak = true;
+        $item = VanillaItems::AIR();
+        if($player->getWorld()->useBreakOn($block->getPosition(), $item, $player, true)){
+            $player->getHungerManager()->exhaust(0.005, PlayerExhaustEvent::CAUSE_MINING);
+        }else{
+            $this->handleBreak = false;
+        }
+    }
+
+    public static function isRipeCrop(Block $block) : bool{
+        return $block instanceof Crops && !($block instanceof Stem) && $block->getAge() >= $block::MAX_AGE;
+    }
 }
